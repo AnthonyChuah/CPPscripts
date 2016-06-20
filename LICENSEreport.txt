@@ -1,0 +1,2 @@
+Word count: 4418
+Mean word length: 5.60865
