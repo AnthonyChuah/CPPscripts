@@ -1,0 +1,134 @@
+// Implementation file of queue.cpp.
+#include <iostream>
+#include <cstdlib>
+#include <cstddef>
+#include "Queue.h"
+using namespace std;
+
+namespace queueanton
+{
+  // Empty constructor.
+  Queue::Queue() : front(NULL), back(NULL)
+  {
+    // Empty.
+  }
+
+  // Copy constructor.
+  Queue::Queue(const Queue& aQueue)
+  {
+    // TARGET is our own object, SOURCE is the queue from which we copy.
+    if (aQueue.empty())
+      {
+	// If the SOURCE is empty then just set front and back to NULL.
+	front = NULL;
+	back = NULL;
+      }
+    else
+      {
+        // Source not empty.
+        // Start copying from front to back.
+	// Imagine I have my eye scanning each node of the SOURCE.
+	// I also have a needle knitting the nodes of my TARGET.
+        QueueNodePtr eye = aQueue.front;
+        // Make a travelling object 'needle' to go through the nodes.
+        // The travelling object is like the needle that knits our new linked list together.
+        QueueNodePtr needle;
+        // Declare a dynamic variable for needle.
+        needle = new QueueNode;
+        // Now assign the data of needle.
+        needle->data = eye->data;
+        // Now set the front to the needle.
+        front = needle;
+        // Now move the temp one step back through queue.
+        eye = eye->link;
+        while (eye != NULL)
+          {
+            // Make a new node, and point previous node's link to new node.
+            needle->link = new QueueNode;
+            // Now move the needle to this new node by using the pointer from the previous line.
+            needle = needle->link;
+            // Set the data of the node where needle is currently at to the corresponding data from
+	    // the SOURCE's corresponding node.
+            needle->data = eye->data;
+	    // Now advance my eye through the SOURCE to the next node.
+            eye = eye->link;
+          }
+        needle->link = NULL;
+	back = needle;
+      }
+  }
+
+  // Destructor.
+  Queue::~Queue()
+  {
+    // Write your own destructor.
+    // Sequentially remove everything.
+    char next;
+    while (!empty())
+      {
+	next = remove();
+      }
+  }
+
+  // Check if queue is empty.
+  bool Queue::empty() const
+  {
+    return (back == NULL);
+  }
+
+  void Queue::add(char item)
+  {
+    if (empty())
+      // If the queue is presently empty, introduce one node as its front and back.
+      {
+	// Declare dynamic variable.
+	front = new QueueNode;
+	// Set the data to the input argument.
+	front->data = item;
+	// Now set the link to null, so that it's a single-node queue.
+	front->link = NULL;
+	// Now set the back to be the same as the front.
+	back = front;
+      }
+    else
+      {
+	// Then the queue isn't empty. Introduce this new guy to the back.
+	// Declare a temporary node pointer.
+	QueueNodePtr temp_ptr;
+	// Now point it at a new dynamic variable on the heap.
+	temp_ptr = new QueueNode;
+	// Set the data to the input argument.
+	temp_ptr->data = item;
+	// Make sure its link points to NULL.
+	temp_ptr->link = NULL;
+	// Now point the link at the hitherto back-of-queue to the temp_ptr.
+	back->link = temp_ptr;
+	// Finally, set the back to the new temp_ptr because it's now the back of queue.
+	back = temp_ptr;
+      }
+  }
+
+  char Queue::remove()
+  {
+    // Check if queue empty. If so, throw error.
+    if (empty())
+      {
+	cout << "Error: Removing item from empty queue.\n";
+	exit(1);
+      }
+    // Prepare result for returning.
+    char result = front->data;
+    // Declare a new node pointer.
+    QueueNodePtr discard;
+    // Point it at the front.
+    discard = front;
+    // Set the new front of queue to the second guy, because first guy is leaving.
+    front = front->link;
+    // If there was only one node to remove, set the back also to NULL.
+    if (front == NULL)
+      back = NULL;
+    // Pointer discard was pointing to the old front. Now use it to delete from heap.
+    delete discard;
+    return result;
+  }
+} // End of queueanton.
