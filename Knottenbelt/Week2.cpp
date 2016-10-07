@@ -55,11 +55,21 @@ void Temperature::display_row()
 
 int main()
 {
+  double minimum, maximum, stepsize;
   cout << "Welcome to the Temperature Table.\n";
-  cout << "Displaying F, C, and K temperatures in increments of 20F:\n\n";
+  cout << "Table's first row is an entry for the minimum Fahrenheit value\n"
+       << "and following rows increment by a step-size.\n";
+  cout << "Minimum Fahrenheit? > ";
+  cin >> minimum;
+  cout << "Maximum Fahrenheit? > ";
+  cin >> maximum;
+  cout << "Step-size? > ";
+  cin >> stepsize;
+  cout << "Displaying F, C, and K temperatures in increments of "
+       << stepsize << "F:\n\n";
   cout << "Fahrenheit     Celsius        Absolute Value \n\n";
   Temperature temp;
-  for (int i = 0; i <= 300; i += 20)
+  for (int i = minimum; i <= maximum; i += stepsize)
     {
       temp.input_temp(i, 'F');
       temp.display_row();
