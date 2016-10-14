@@ -36,7 +36,7 @@ void assign_new_node(NodePtr &a_node);
 void print_list(NodePtr a_node);
 
 /* Function to add a new node after a node with a string match */
-void add_after(NodePtr &list, char a_word[], char word_after[]);
+void add_after(NodePtr &list, char a_word[], char after_this_word[]);
 
 /* Function to delete a node from the linked list */
 void delete_node(NodePtr &list, char word_to_delete[]);
@@ -58,13 +58,16 @@ int main()
   cin >> after_this;
   cout << "Which word would you like to add? ";
   cin >> word_to_add;
+  add_after(my_list, word_to_add, after_this);
   cout << "\nThe list is now:\n";
   print_list(my_list);
   char word_to_delete[MAX_WORD_LENGTH];
-  cout << "Which word would you like to delete? ";
+  cout << "\nWhich word would you like to delete? ";
   cin >> word_to_delete;
   delete_node(my_list, word_to_delete);
   print_list(my_list);
+  cout << "\nType anything to continue:";
+  cin >> word_to_delete;
   list_selection_sort(my_list);
   print_list(my_list);
   return 0;
@@ -93,7 +96,7 @@ void assign_list(NodePtr &a_list)
       assign_new_node(last_node);
       // Assign new node simply makes new node on heap. Does nothing else.
       // Now last_node points to the new node on the heap.
-      Cout << "Enter next word (or '.' to end list): ";
+      cout << "Enter next word (or '.' to end list): ";
       cin >> last_node->word;
       // Write the word into the new node on the heap.
       if (!strcmp(".",last_node->word))
@@ -129,7 +132,7 @@ void print_list(NodePtr a_node)
     }
 }
 
-void add_after(NodePtr &list, char a_word[], char word_after[])
+void add_after(NodePtr &list, char a_word[], char after_this_word[])
 {
   // a_word is the word we want to add.
   // word_after is the marker after which we want to add.
@@ -142,12 +145,13 @@ void add_after(NodePtr &list, char a_word[], char word_after[])
   NodePtr traverser_nodeptr = list, next_node, inserted_node;
   while (traverser_nodeptr != NULL)
     {
-      if (!strcmp(word_after,traverser_nodeptr->word))
+      if (!strcmp(after_this_word,traverser_nodeptr->word))
 	{
 	  // Record the address of the next node. I'll need it later.
 	  next_node = traverser_nodeptr->next;
 	  assign_new_node(inserted_node); // inserted_node points to new node on heap.
 	  inserted_node->next = next_node; // Make sure the new node points to the next node.
+	  strcpy(inserted_node->word, a_word); // Copy the word.
 	  traverser_nodeptr->next = inserted_node; // Make sure traverser points to new node.
 	  break; // Only do one insertion in linked list for the first match.
 	}
@@ -181,14 +185,15 @@ void delete_node(NodePtr &list, char word_to_delete[])
     {
       while (traverser != NULL)
 	{
-	  if (!strcmp(word_to_delete, prev_node = NULL))
+	  if (!strcmp(word_to_delete, traverser->word))
 	    {
+	      // Once we find the match, make previous node point to next node.
 	      prev_node->next = traverser->next;
+	      delete traverser;
+	      break;
 	    }
 	  prev_node = traverser;
 	  traverser = traverser->next;
-	  delete traverser;
-	  break; // We want to do only one deletion in the linked list for the first match.
 	}
     }
 }
@@ -219,29 +224,29 @@ void list_selection_sort(NodePtr &list)
   // Let's call it outer_iter.
   // Second iterator crawls over the sublist AFTER wherever the first iterator was.
   // Let's call it inner_iter.
-  // For logistical purposes, we need to record outer_prev and outer_next.
-  // And inner_prev and inner_next.
   // Finally, a pointer which acts as a flag called inner_minfinder.
   // This pointer tells you which element is the smallest to the right of the first iterator.
   // Using compare_bigness_strings, we can do lexicographical ordering comparisons.
-  NodePtr outer_iter, outer_prev, outer_next;
+  NodePtr outer_iter;
   NodePtr inner_iter;
-  NodePtr inner_minfinder, inner_minfnext, inner_minfprev;
+  NodePtr inner_minfinder;
   // Start traversing the list:
   for (outer_iter = list; outer_iter->next != NULL; outer_iter = outer_iter->next)
     {
       // Initialize inner iterator on the same address as outer iterator.
-      inner_minfinder = inner_iter; inner_minfprev = NULL; inner_minfnext = NULL;
+      inner_minfinder = outer_iter;
       for (inner_iter = outer_iter; inner_iter != NULL; inner_iter = inner_iter->next)
 	{
 	  if (compare_bigness_strings(inner_iter->word, inner_minfinder->word))
 	    {
-	      inner_minfprev = inner_prev;
+	      // This will find the node with the "smallest" word.
 	      inner_minfinder = inner_iter;
-	      inner_minfnext = inner_minfinder->next;
 	    }
-	  inner_prev = inner_iter;
 	}
-    }
+      // Now swap the words at outer_iter and inner_minfinder.
+      char temp[80];
+      strcpy(temp, inner_minfinder->word);
+      strcpy(inner_minfinder->word, outer_iter->word);
+      strcpy(outer_iter->word, temp);
     }
 }
