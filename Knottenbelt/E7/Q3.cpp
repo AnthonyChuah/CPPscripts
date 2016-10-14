@@ -39,7 +39,10 @@ void print_list(NodePtr a_node);
 void add_after(NodePtr &list, char a_word[], char word_after[]);
 
 /* Function to delete a node from the linked list */
-void delete_node(NodePtr &list, char a_word[]);
+void delete_node(NodePtr &list, char word_to_delete[]);
+
+/* Function to compare strings by alphabetical bigness i.e. lexicographical ordering */
+bool compare_bigness_strings(char first[], char second[]);
 
 /* Function to sort the nodes in the linked list according to alphabetical bigness */
 void list_selection_sort(NodePtr &list);
@@ -70,29 +73,40 @@ int main()
 void assign_list(NodePtr &a_list)
 {
   NodePtr current_node, last_node;
-
+  // Creates new node on heap. Did nothing else.
   assign_new_node(a_list);
   cout << "Enter first word (or '.' to end list): ";
   cin >> a_list->word;
+  // The inputted node pointer's Node contains the first word.
   if (!strcmp(".",a_list->word))
     {
       delete a_list;
       a_list = NULL;
     }
+  // If the first word was '.', delete the new node.
   current_node = a_list;
-
+  // Set current_node NodePtr to the inputted node pointer.
+  // See how if current_node is NULL, nothing will happen:
   while (current_node != NULL)
     {
+      // current_node is pointing at the inputted node pointer's contents.
       assign_new_node(last_node);
-      cout << "Enter next word (or '.' to end list): ";
+      // Assign new node simply makes new node on heap. Does nothing else.
+      // Now last_node points to the new node on the heap.
+      Cout << "Enter next word (or '.' to end list): ";
       cin >> last_node->word;
+      // Write the word into the new node on the heap.
       if (!strcmp(".",last_node->word))
 	{
 	  delete last_node;
 	  last_node = NULL;
 	}
+      // If the new word is '.', simply delete the new node.
       current_node->next = last_node;
+      // Current_node is pointing at inputted node pointer's contents. Its ->next attribute is
+      // now set to point to the new node on the heap.
       current_node = last_node;
+      // Now move the current_node (like incrementing along ->next) to the next node.
     }
 }
 
@@ -112,5 +126,122 @@ void print_list(NodePtr a_node)
     {
       cout << a_node->word << " ";
       a_node = a_node->next;
+    }
+}
+
+void add_after(NodePtr &list, char a_word[], char word_after[])
+{
+  // a_word is the word we want to add.
+  // word_after is the marker after which we want to add.
+  if (list == NULL)
+    {
+      // List is empty. Do nothing and return.
+      return;
+    }
+  // I need a moving node that traverses the links in the node. Call it traverser_nodeptr.
+  NodePtr traverser_nodeptr = list, next_node, inserted_node;
+  while (traverser_nodeptr != NULL)
+    {
+      if (!strcmp(word_after,traverser_nodeptr->word))
+	{
+	  // Record the address of the next node. I'll need it later.
+	  next_node = traverser_nodeptr->next;
+	  assign_new_node(inserted_node); // inserted_node points to new node on heap.
+	  inserted_node->next = next_node; // Make sure the new node points to the next node.
+	  traverser_nodeptr->next = inserted_node; // Make sure traverser points to new node.
+	  break; // Only do one insertion in linked list for the first match.
+	}
+      traverser_nodeptr = traverser_nodeptr->next;
+    }
+}
+
+void delete_node(NodePtr &list, char word_to_delete[])
+{
+  // Strategy:
+  // First verify that the linked list is not empty. If empty, do nothing.
+  // Then check for special case: single node linked list.
+  // Else: traverse the nodes of the linked list.
+  // The moment you find a match !strcmp(word_to_delete, traverser->word):
+  if (list == NULL)
+    return;
+  // Set the traverser to the inputted node pointer address.
+  NodePtr traverser = list, prev_node = NULL;
+  if (!strcmp(word_to_delete, list->word))
+    {
+      // Record the address of the node to delete.
+      prev_node = list;
+      // Move the inputted node ptr to the next in the linked list.
+      list = list->next;
+      // Now remove the actual data from the heap corresp. to prev_node.
+      delete prev_node;
+      // Set prev_node to the null pointer so you don't access a lost of the heap.
+      prev_node = NULL;
+    }
+  else
+    {
+      while (traverser != NULL)
+	{
+	  if (!strcmp(word_to_delete, prev_node = NULL))
+	    {
+	      prev_node->next = traverser->next;
+	    }
+	  prev_node = traverser;
+	  traverser = traverser->next;
+	  delete traverser;
+	  break; // We want to do only one deletion in the linked list for the first match.
+	}
+    }
+}
+
+bool compare_bigness_strings(char first[], char second[])
+{
+  char* j = second;
+  for (char* i = first; true; i++)
+    {
+      if (static_cast<int>(*i) < static_cast<int>(*j))
+	return true;
+      else if (static_cast<int>(*i) > static_cast<int>(*j))
+	return false;
+      else if (*i == '\0')
+	return false;
+      else
+	j++;
+      continue;
+    }
+  return false;
+}
+
+void list_selection_sort(NodePtr &list)
+{
+  // Strategy:
+  // Imagine you have two iterators, just like the i and j in for-loop method.
+  // First iterator crawls over the list, like the outer loop i iteration.
+  // Let's call it outer_iter.
+  // Second iterator crawls over the sublist AFTER wherever the first iterator was.
+  // Let's call it inner_iter.
+  // For logistical purposes, we need to record outer_prev and outer_next.
+  // And inner_prev and inner_next.
+  // Finally, a pointer which acts as a flag called inner_minfinder.
+  // This pointer tells you which element is the smallest to the right of the first iterator.
+  // Using compare_bigness_strings, we can do lexicographical ordering comparisons.
+  NodePtr outer_iter, outer_prev, outer_next;
+  NodePtr inner_iter;
+  NodePtr inner_minfinder, inner_minfnext, inner_minfprev;
+  // Start traversing the list:
+  for (outer_iter = list; outer_iter->next != NULL; outer_iter = outer_iter->next)
+    {
+      // Initialize inner iterator on the same address as outer iterator.
+      inner_minfinder = inner_iter; inner_minfprev = NULL; inner_minfnext = NULL;
+      for (inner_iter = outer_iter; inner_iter != NULL; inner_iter = inner_iter->next)
+	{
+	  if (compare_bigness_strings(inner_iter->word, inner_minfinder->word))
+	    {
+	      inner_minfprev = inner_prev;
+	      inner_minfinder = inner_iter;
+	      inner_minfnext = inner_minfinder->next;
+	    }
+	  inner_prev = inner_iter;
+	}
+    }
     }
 }
