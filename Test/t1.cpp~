@@ -1,0 +1,15 @@
+#include <iostream>
+
+int main() {
+  int a = 10;
+  int* p = new int(1000);
+  int& ref = a;
+
+  std::cout << "Values of a p and ref: " << a << " " << p << " " << ref << "\n";
+
+  // Modify ref, check if a changed.
+  ++ref;
+  std::cout << "a and ref: " << a << " " << ref << "\n";
+  
+  return 0;
+}

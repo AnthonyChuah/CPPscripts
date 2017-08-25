@@ -1,0 +1,12 @@
+// Program to demonstrate the class Money.
+#include <iostream>
+#include <cstdlib>
+#include <cctype>
+using namespace std;
+
+class Money
+{
+public:
+  friend Money add(Money amount1, Money amount2);
+  // Adds the two amounts.
+  friend bool equal 
